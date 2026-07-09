@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertisseur TVA HT / TTC — 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --ink: #14171f;
+    --muted: #6b7280;
+    --border: #e7e8ec;
+    --accent: #2554ec;
+    --accent-soft: #eaefff;
+    --neg: #b3392f;
+    --track: #eceef2;
+    --paper: #f6f0e2;
+    --paper-ink: #2b2a24;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 16px 60px;
+  }
+
+  .wrap { max-width: 480px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px; font-weight: 700; margin: 0 0 6px;
+    letter-spacing: -0.01em; line-height: 1.25;
+  }
+  .subtitle { font-size: 14px; color: var(--muted); margin: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(20,23,31,0.03);
+  }
+
+  .field-label { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 10px; }
+
+  .direction-tabs {
+    display: inline-flex; background: var(--track); border-radius: 9px; padding: 3px; margin-bottom: 20px; width: 100%;
+  }
+  .direction-tab {
+    flex: 1; border: none; background: transparent; padding: 9px 10px; border-radius: 7px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .direction-tab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(20,23,31,0.08); }
+
+  .amount-row {
+    display: flex; align-items: center; gap: 8px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .amount-currency { font-size: 26px; font-weight: 700; color: var(--muted); }
+  #amountInput {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 34px; font-weight: 800;
+    color: var(--ink); padding: 0; min-width: 0;
+  }
+  #amountInput::placeholder { color: #cdd0d8; }
+
+  .rate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 22px; }
+  .rate-btn {
+    border: 1.5px solid var(--border); background: var(--card); border-radius: 10px;
+    padding: 10px 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--ink); cursor: pointer; text-align: center; transition: all 0.15s ease;
+  }
+  .rate-btn .r-sub { display: block; font-size: 9.5px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+  .rate-btn:hover { border-color: var(--accent); }
+  .rate-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+  .rate-btn.active .r-sub { color: var(--accent); }
+
+  .receipt { background: var(--paper); border-radius: 4px; padding: 20px 20px 16px; position: relative; color: var(--paper-ink); }
+  .receipt::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 9px;
+    background: linear-gradient(-45deg, var(--card) 4.5px, transparent 0), linear-gradient(45deg, var(--card) 4.5px, transparent 0);
+    background-size: 9px 9px; background-repeat: repeat-x;
+  }
+  .receipt-topline {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: #8a8574; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+  }
+
+  .result-label { font-size: 11.5px; font-weight: 700; color: #6b6656; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .result-value {
+    font-family: 'Space Grotesk', sans-serif; font-size: 38px; font-weight: 700;
+    color: var(--paper-ink); font-variant-numeric: tabular-nums; margin-bottom: 14px;
+  }
+  .result-empty { font-family: 'Inter', sans-serif; font-size: 13px; color: #8a8574; padding: 6px 0 2px; }
+
+  .receipt-divider { border: none; border-top: 1px dashed #c9c2ad; margin: 4px 0 10px; }
+
+  .breakdown-line {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; padding: 4px 0; color: #5c5847;
+  }
+  .breakdown-line .bl-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .breakdown-line.highlight .bl-val { color: var(--neg); }
+
+  .reco-line {
+    margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.5;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .reco-line strong { color: var(--ink); }
+
+  .disclaimer { text-align: center; font-size: 11px; color: #9ca0ab; margin-top: 18px; line-height: 1.6; }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 22px; }
+    #amountInput { font-size: 28px; }
+    .result-value { font-size: 30px; }
+    .rate-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Taux TVA France 2026</div>
+    <h1>Convertisseur HT / TTC</h1>
+    <p class="subtitle">Passez d'un montant hors taxes à toutes taxes comprises, et inversement.</p>
+  </header>
+
+  <div class="card">
+    <div class="direction-tabs" id="directionTabs">
+      <button class="direction-tab active" data-value="httoTtc">J'ai un montant HT</button>
+      <button class="direction-tab" data-value="ttcToHt">J'ai un montant TTC</button>
+    </div>
+
+    <div class="field-label" id="amountLabel">Montant hors taxes (HT)</div>
+    <div class="amount-row">
+      <span class="amount-currency">€</span>
+      <input type="number" id="amountInput" placeholder="0" min="0" inputmode="decimal">
+    </div>
+
+    <div class="field-label">Taux de TVA applicable</div>
+    <div class="rate-grid" id="rateGrid">
+      <button class="rate-btn active" data-value="20">20 %<span class="r-sub">Taux normal</span></button>
+      <button class="rate-btn" data-value="10">10 %<span class="r-sub">Intermédiaire</span></button>
+      <button class="rate-btn" data-value="5.5">5,5 %<span class="r-sub">Réduit</span></button>
+      <button class="rate-btn" data-value="2.1">2,1 %<span class="r-sub">Particulier</span></button>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-topline">
+        <span id="receiptRate">Taux 20 %</span>
+        <span id="receiptDate"></span>
+      </div>
+
+      <div id="resultWithValue">
+        <div class="result-label" id="resultLabel">Montant TTC</div>
+        <div class="result-value" id="resultValue">0,00 €</div>
+
+        <hr class="receipt-divider">
+
+        <div class="breakdown-line">
+          <span>Montant HT</span>
+          <span class="bl-val" id="lineHT">0,00 €</span>
+        </div>
+        <div class="breakdown-line highlight">
+          <span id="lineTvaLabel">TVA (20 %)</span>
+          <span class="bl-val" id="lineTVA">0,00 €</span>
+        </div>
+        <div class="breakdown-line">
+          <span>Montant TTC</span>
+          <span class="bl-val" id="lineTTC">0,00 €</span>
+        </div>
+      </div>
+
+      <div class="result-empty" id="resultEmpty">
+        Indiquez un montant ci-dessus pour voir la conversion.
+      </div>
+    </div>
+
+    <div class="reco-line">
+      <strong>Bon à savoir</strong><br>
+      si vous êtes en franchise en base de TVA, vos factures ne doivent pas comporter de TVA — cet outil ne s'applique que si vous êtes redevable de la TVA.
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Taux de TVA en vigueur en France au 01/01/2026 (article 278 et suivants du CGI).<br>
+    Simulation indicative — vérifiez sur economie.gouv.fr
+  </p>
+</div>
+
+<script>
+  const rateLabels = { "20": "Taux normal", "10": "Taux intermédiaire", "5.5": "Taux réduit", "2.1": "Taux particulier" };
+
+  let currentDirection = "httoTtc";
+  let currentRate = 20;
+
+  const amountInput = document.getElementById("amountInput");
+  const directionTabs = document.getElementById("directionTabs");
+  const rateGrid = document.getElementById("rateGrid");
+  const resultWithValue = document.getElementById("resultWithValue");
+  const resultEmpty = document.getElementById("resultEmpty");
+
+  function fmt(n) {
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  }
+
+  function calculate() {
+    const amount = parseFloat(amountInput.value) || 0;
+    document.getElementById("amountLabel").textContent = currentDirection === "httoTtc" ? "Montant hors taxes (HT)" : "Montant toutes taxes comprises (TTC)";
+    document.getElementById("receiptRate").textContent = `Taux ${currentRate.toString().replace('.', ',')} %`;
+    document.getElementById("receiptDate").textContent = new Date().toLocaleDateString('fr-FR');
+
+    if (amount <= 0) {
+      resultWithValue.style.display = "none";
+      resultEmpty.style.display = "block";
+      return;
+    }
+    resultWithValue.style.display = "block";
+    resultEmpty.style.display = "none";
+
+    let ht, ttc, tva;
+    if (currentDirection === "httoTtc") {
+      ht = amount;
+      tva = ht * (currentRate / 100);
+      ttc = ht + tva;
+    } else {
+      ttc = amount;
+      ht = ttc / (1 + currentRate / 100);
+      tva = ttc - ht;
+    }
+
+    document.getElementById("resultLabel").textContent = currentDirection === "httoTtc" ? "Montant TTC" : "Montant HT";
+    document.getElementById("resultValue").textContent = currentDirection === "httoTtc" ? fmt(ttc) : fmt(ht);
+    document.getElementById("lineHT").textContent = fmt(ht);
+    document.getElementById("lineTvaLabel").textContent = `TVA (${currentRate.toString().replace('.', ',')} %)`;
+    document.getElementById("lineTVA").textContent = fmt(tva);
+    document.getElementById("lineTTC").textContent = fmt(ttc);
+  }
+
+  directionTabs.querySelectorAll(".direction-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      directionTabs.querySelectorAll(".direction-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentDirection = btn.dataset.value;
+      calculate();
+    });
+  });
+
+  rateGrid.querySelectorAll(".rate-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      rateGrid.querySelectorAll(".rate-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentRate = parseFloat(btn.dataset.value);
+      calculate();
+    });
+  });
+
+  amountInput.addEventListener("input", calculate);
+
+  calculate();
+</script>
+</body>
+</html>
