@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convertisseur TVA HT / TTC 2026 — Calcul gratuit et rapide | Mes Charges</title>
+<meta name="description" content="Convertissez un montant HT en TTC (ou l'inverse) selon les 4 taux de TVA français : 20%, 10%, 5,5%, 2,1%. Gratuit, calcul instantané.">
+<link rel="canonical" href="https://mescharges.fr/tva-ht-ttc.html">
+<meta property="og:title" content="Convertisseur TVA HT / TTC 2026">
+<meta property="og:description" content="Passez d'un montant HT à TTC et inversement, pour les 4 taux de TVA en vigueur en France.">
+<meta property="og:type" content="website">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --ink: #14171f;
+    --muted: #6b7280;
+    --border: #e7e8ec;
+    --accent: #34518f;
+    --accent-soft: #e8ecf5;
+    --neg: #b3392f;
+    --track: #eceef2;
+    --paper: #f6f0e2;
+    --paper-ink: #2b2a24;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 40px 16px 60px;
+  }
+
+  .wrap { max-width: 480px; margin: 0 auto; }
+
+  header { margin-bottom: 22px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; font-weight: 500; color: var(--muted);
+    letter-spacing: 0; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px; font-weight: 700; margin: 0 0 6px;
+    letter-spacing: -0.01em; line-height: 1.25;
+  }
+  .subtitle { font-size: 14px; color: var(--muted); margin: 0; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 2px rgba(20,23,31,0.03);
+  }
+
+  .field-label { font-size: 12.5px; font-weight: 600; color: var(--muted); margin-bottom: 10px; }
+
+  .direction-tabs {
+    display: inline-flex; background: var(--track); border-radius: 9px; padding: 3px; margin-bottom: 20px; width: 100%;
+  }
+  .direction-tab {
+    flex: 1; border: none; background: transparent; padding: 9px 10px; border-radius: 7px;
+    font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer;
+  }
+  .direction-tab.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(20,23,31,0.08); }
+
+  .amount-row {
+    display: flex; align-items: center; gap: 8px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .amount-currency { font-size: 26px; font-weight: 700; color: var(--muted); }
+  #amountInput {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-family: 'Inter', sans-serif; font-size: 34px; font-weight: 800;
+    color: var(--ink); padding: 0; min-width: 0;
+  }
+  #amountInput::placeholder { color: #cdd0d8; }
+
+  .rate-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 22px; }
+  .rate-btn {
+    border: 1.5px solid var(--border); background: var(--card); border-radius: 10px;
+    padding: 10px 6px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--ink); cursor: pointer; text-align: center; transition: all 0.15s ease;
+  }
+  .rate-btn .r-sub { display: block; font-size: 9.5px; font-weight: 500; color: var(--muted); margin-top: 1px; }
+  .rate-btn:hover { border-color: var(--accent); }
+  .rate-btn.active { border-color: var(--accent); background: var(--accent-soft); }
+  .rate-btn.active .r-sub { color: var(--accent); }
+
+  .receipt { background: var(--paper); border-radius: 4px; padding: 20px 20px 16px; position: relative; color: var(--paper-ink); }
+  .receipt::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 9px;
+    background: linear-gradient(-45deg, var(--card) 4.5px, transparent 0), linear-gradient(45deg, var(--card) 4.5px, transparent 0);
+    background-size: 9px 9px; background-repeat: repeat-x;
+  }
+  .receipt-topline {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: #8a8574; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;
+  }
+
+  .result-label { font-size: 11.5px; font-weight: 700; color: #6b6656; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .result-value {
+    font-family: 'Space Grotesk', sans-serif; font-size: 38px; font-weight: 700;
+    color: var(--paper-ink); font-variant-numeric: tabular-nums; margin-bottom: 14px;
+  }
+  .result-empty { font-family: 'Inter', sans-serif; font-size: 13px; color: #8a8574; padding: 6px 0 2px; }
+
+  .receipt-divider { border: none; border-top: 1px dashed #c9c2ad; margin: 4px 0 10px; }
+
+  .breakdown-line {
+    display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; padding: 4px 0; color: #5c5847;
+  }
+  .breakdown-line .bl-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .breakdown-line.highlight .bl-val { color: var(--neg); }
+
+  .reco-line {
+    margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.5;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .reco-line strong { color: var(--ink); }
+
+  .disclaimer { text-align: center; font-size: 11px; color: #9ca0ab; margin-top: 18px; line-height: 1.6; }
+
+  /* CONTENT / SEO SECTION */
+  .content-wrap { max-width: 620px; margin: 48px auto 0; padding: 0 4px; }
+  .content-section { margin-bottom: 36px; }
+  .content-section h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 700; margin: 0 0 14px; letter-spacing: -0.01em;
+  }
+  .content-section p { font-size: 14.5px; line-height: 1.7; color: #3a3d47; margin: 0 0 14px; }
+
+  .faq-item { border-bottom: 1px solid var(--border); padding: 14px 2px; cursor: pointer; }
+  .faq-item:first-of-type { border-top: 1px solid var(--border); }
+  .faq-item summary {
+    font-size: 14.5px; font-weight: 600; color: var(--ink); list-style: none;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: "+"; font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 400;
+    color: var(--accent); opacity: 0.55; flex-shrink: 0; transition: transform 0.15s ease;
+  }
+  .faq-item[open] summary::after { transform: rotate(45deg); }
+  .faq-item p { font-size: 13.5px; line-height: 1.6; color: var(--muted); margin: 10px 0 0; }
+
+  .related-tools ul { list-style: none; padding: 0; margin: 0; }
+  .related-tools li { border-bottom: 1px solid var(--border); }
+  .related-tools li:first-child { border-top: 1px solid var(--border); }
+  .related-tools a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 2px; color: var(--ink); font-size: 14px; font-weight: 500; text-decoration: none;
+  }
+  .related-tools a::after { content: "→"; color: var(--accent); }
+  .related-tools a:hover { color: var(--accent); }
+
+  @media (max-width: 420px) {
+    h1 { font-size: 22px; }
+    #amountInput { font-size: 28px; }
+    .result-value { font-size: 30px; }
+    .rate-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* DESKTOP : élargit la carte sur grand écran au lieu de rester en colonne mobile étroite */
+  @media (min-width: 900px) {
+    body { padding-top: 64px; }
+    .wrap { max-width: 720px; }
+    h1 { font-size: 32px; }
+    .subtitle { font-size: 15.5px; }
+    .card { padding: 34px 40px; }
+    #amountInput { font-size: 48px; }
+    .content-wrap { max-width: 720px; }
+  }
+
+  /* NAV BAR */
+  .site-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; position: relative; }
+  .nav-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; color: var(--ink); text-decoration: none; }
+  .nav-toggle {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    width: 36px; height: 36px; font-size: 15px; cursor: pointer; color: var(--ink);
+  }
+  .nav-dropdown {
+    display: none; position: absolute; right: 0; top: 44px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(20,23,31,0.12);
+    padding: 6px; min-width: 230px; z-index: 100;
+  }
+  .nav-dropdown.open { display: block; }
+  .nav-dropdown a {
+    display: block; padding: 9px 12px; font-size: 13px; font-weight: 500;
+    color: var(--ink); text-decoration: none; border-radius: 6px;
+  }
+  .nav-dropdown a:hover { background: var(--accent-soft); color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="site-nav">
+    <a href="/" class="nav-logo">Mes Charges</a>
+    <div style="position: relative;">
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+      <div class="nav-dropdown" id="navDropdown">
+        <a href="/">Accueil</a>
+        <a href="/charges-urssaf.html">Charges URSSAF</a>
+        <a href="/seuils-micro-entreprise.html">Seuils micro-entreprise</a>
+        <a href="/tva-ht-ttc.html">TVA HT / TTC</a>
+        <a href="/trimestres-retraite.html">Trimestres retraite</a>
+        <a href="/bareme-kilometrique.html">Barème kilométrique</a>
+      </div>
+    </div>
+  </nav>
+  <header>
+    <div class="eyebrow">Taux TVA France · mise à jour 2026</div>
+    <h1>Convertisseur HT / TTC</h1>
+    <p class="subtitle">Passez d'un montant hors taxes à toutes taxes comprises, et inversement.</p>
+  </header>
+
+  <div class="card">
+    <div class="direction-tabs" id="directionTabs">
+      <button class="direction-tab active" data-value="httoTtc">J'ai un montant HT</button>
+      <button class="direction-tab" data-value="ttcToHt">J'ai un montant TTC</button>
+    </div>
+
+    <div class="field-label" id="amountLabel">Montant hors taxes (HT)</div>
+    <div class="amount-row">
+      <span class="amount-currency">€</span>
+      <input type="number" id="amountInput" placeholder="0" min="0" inputmode="decimal">
+    </div>
+
+    <div class="field-label">Taux de TVA applicable</div>
+    <div class="rate-grid" id="rateGrid">
+      <button class="rate-btn active" data-value="20">20 %<span class="r-sub">Taux normal</span></button>
+      <button class="rate-btn" data-value="10">10 %<span class="r-sub">Intermédiaire</span></button>
+      <button class="rate-btn" data-value="5.5">5,5 %<span class="r-sub">Réduit</span></button>
+      <button class="rate-btn" data-value="2.1">2,1 %<span class="r-sub">Particulier</span></button>
+    </div>
+
+    <div class="receipt">
+      <div class="receipt-topline">
+        <span id="receiptRate">Taux 20 %</span>
+        <span id="receiptDate"></span>
+      </div>
+
+      <div id="resultWithValue">
+        <div class="result-label" id="resultLabel">Montant TTC</div>
+        <div class="result-value" id="resultValue">0,00 €</div>
+
+        <hr class="receipt-divider">
+
+        <div class="breakdown-line">
+          <span>Montant HT</span>
+          <span class="bl-val" id="lineHT">0,00 €</span>
+        </div>
+        <div class="breakdown-line highlight">
+          <span id="lineTvaLabel">TVA (20 %)</span>
+          <span class="bl-val" id="lineTVA">0,00 €</span>
+        </div>
+        <div class="breakdown-line">
+          <span>Montant TTC</span>
+          <span class="bl-val" id="lineTTC">0,00 €</span>
+        </div>
+      </div>
+
+      <div class="result-empty" id="resultEmpty">
+        Indiquez un montant ci-dessus pour voir la conversion.
+      </div>
+    </div>
+
+    <div class="reco-line">
+      <strong>Bon à savoir</strong><br>
+      si vous êtes en franchise en base de TVA, vos factures ne doivent pas comporter de TVA — cet outil ne s'applique que si vous êtes redevable de la TVA.
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Taux de TVA en vigueur en France au 01/01/2026 (article 278 et suivants du CGI).<br>
+    Simulation indicative — vérifiez sur economie.gouv.fr
+  </p>
+</div>
+
+<article class="content-wrap">
+  <section class="content-section">
+    <h2>Comment calculer la TVA sur une facture ?</h2>
+    <p>Le calcul entre HT (hors taxes) et TTC (toutes taxes comprises) repose sur une formule simple, mais qui change de sens selon le point de départ. Pour passer d'un montant HT à un montant TTC, on multiplie par (1 + taux de TVA) : à 20 %, un prix de 100 € HT devient 120 € TTC. Pour l'opération inverse, passer d'un TTC à un HT, il ne suffit pas de soustraire 20 % du TTC — il faut diviser par (1 + taux) : 120 € TTC divisé par 1,20 redonne bien 100 € HT, alors que soustraire 20 % de 120 € donnerait à tort 96 €.</p>
+    <p>La France applique quatre taux de TVA selon la nature du bien ou du service : 20 % pour le taux normal (la majorité des biens et services), 10 % pour le taux intermédiaire (restauration, transport, travaux de rénovation), 5,5 % pour le taux réduit (produits alimentaires de base, livres, énergie), et 2,1 % pour le taux particulier (médicaments remboursables, presse).</p>
+    <p>Si vous êtes en franchise en base de TVA (le cas de la majorité des micro-entrepreneurs sous les seuils), vous ne devez ni facturer ni collecter de TVA — vos factures doivent au contraire mentionner "TVA non applicable, article 293 B du CGI".</p>
+  </section>
+
+  <section class="content-section">
+    <h2 class="faq-heading">Questions fréquentes</h2>
+
+    <details class="faq-item">
+      <summary>Pourquoi ne peut-on pas juste soustraire le pourcentage du TTC ?</summary>
+      <p>Parce que le taux de TVA s'applique au montant HT, pas au montant TTC. Soustraire 20 % d'un TTC revient à appliquer le taux sur une base déjà majorée, ce qui donne un résultat inférieur au vrai montant HT. Il faut diviser le TTC par (1 + taux) pour retrouver le HT exact.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Quel taux de TVA s'applique à mon activité ?</summary>
+      <p>Cela dépend de la nature exacte du bien ou service vendu, pas du statut de l'entreprise. La majorité des prestations de service et produits relèvent du taux normal à 20 % ; les secteurs spécifiques (restauration, livres, travaux) bénéficient de taux réduits fixés par le code général des impôts.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Un auto-entrepreneur doit-il facturer la TVA ?</summary>
+      <p>Non, tant qu'il reste sous le seuil de franchise en base de TVA (37 500 € pour les services, 85 000 € pour la vente en 2026). Au-delà, il devient redevable et doit facturer la TVA comme n'importe quelle entreprise.</p>
+    </details>
+
+    <details class="faq-item">
+      <summary>Le montant de TVA collectée doit-il être reversé en totalité ?</summary>
+      <p>Une entreprise redevable de la TVA reverse la différence entre la TVA collectée sur ses ventes et la TVA déductible sur ses achats professionnels — pas la totalité de la TVA collectée si elle a elle-même payé de la TVA sur ses dépenses.</p>
+    </details>
+  </section>
+
+  <section class="content-section related-tools">
+    <h2>Continuer avec les autres outils</h2>
+    <ul>
+      <li><a href="/charges-urssaf.html">Calculateur de charges URSSAF</a></li>
+      <li><a href="/seuils-micro-entreprise.html">Suis-je proche de mes seuils micro-entreprise et TVA ?</a></li>
+      <li><a href="/trimestres-retraite.html">Combien de trimestres de retraite ai-je validés ?</a></li>
+      <li><a href="/bareme-kilometrique.html">Calculateur de barème kilométrique</a></li>
+    </ul>
+  </section>
+</article>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Pourquoi ne peut-on pas juste soustraire le pourcentage du TTC ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Le taux de TVA s'applique au montant HT, pas au montant TTC. Soustraire 20 % d'un TTC donne un résultat inférieur au vrai montant HT. Il faut diviser le TTC par (1 + taux) pour retrouver le HT exact."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quel taux de TVA s'applique à mon activité ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Cela dépend de la nature exacte du bien ou service vendu. La majorité des prestations relèvent du taux normal à 20 % ; certains secteurs (restauration, livres, travaux) bénéficient de taux réduits fixés par le code général des impôts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Un auto-entrepreneur doit-il facturer la TVA ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non, tant qu'il reste sous le seuil de franchise en base de TVA, soit 37 500 € pour les services et 85 000 € pour la vente en 2026. Au-delà, il devient redevable et doit facturer la TVA."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Le montant de TVA collectée doit-il être reversé en totalité ?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Non, une entreprise redevable reverse la différence entre la TVA collectée sur ses ventes et la TVA déductible sur ses achats professionnels."
+      }
+    }
+  ]
+}
+</script>
+
+<script>
+  const rateLabels = { "20": "Taux normal", "10": "Taux intermédiaire", "5.5": "Taux réduit", "2.1": "Taux particulier" };
+
+  let currentDirection = "httoTtc";
+  let currentRate = 20;
+
+  const amountInput = document.getElementById("amountInput");
+  const directionTabs = document.getElementById("directionTabs");
+  const rateGrid = document.getElementById("rateGrid");
+  const resultWithValue = document.getElementById("resultWithValue");
+  const resultEmpty = document.getElementById("resultEmpty");
+
+  function fmt(n) {
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  }
+
+  function calculate() {
+    const amount = parseFloat(amountInput.value) || 0;
+    document.getElementById("amountLabel").textContent = currentDirection === "httoTtc" ? "Montant hors taxes (HT)" : "Montant toutes taxes comprises (TTC)";
+    document.getElementById("receiptRate").textContent = `Taux ${currentRate.toString().replace('.', ',')} %`;
+    document.getElementById("receiptDate").textContent = new Date().toLocaleDateString('fr-FR');
+
+    if (amount <= 0) {
+      resultWithValue.style.display = "none";
+      resultEmpty.style.display = "block";
+      return;
+    }
+    resultWithValue.style.display = "block";
+    resultEmpty.style.display = "none";
+
+    let ht, ttc, tva;
+    if (currentDirection === "httoTtc") {
+      ht = amount;
+      tva = ht * (currentRate / 100);
+      ttc = ht + tva;
+    } else {
+      ttc = amount;
+      ht = ttc / (1 + currentRate / 100);
+      tva = ttc - ht;
+    }
+
+    document.getElementById("resultLabel").textContent = currentDirection === "httoTtc" ? "Montant TTC" : "Montant HT";
+    document.getElementById("resultValue").textContent = currentDirection === "httoTtc" ? fmt(ttc) : fmt(ht);
+    document.getElementById("lineHT").textContent = fmt(ht);
+    document.getElementById("lineTvaLabel").textContent = `TVA (${currentRate.toString().replace('.', ',')} %)`;
+    document.getElementById("lineTVA").textContent = fmt(tva);
+    document.getElementById("lineTTC").textContent = fmt(ttc);
+  }
+
+  directionTabs.querySelectorAll(".direction-tab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      directionTabs.querySelectorAll(".direction-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentDirection = btn.dataset.value;
+      calculate();
+    });
+  });
+
+  rateGrid.querySelectorAll(".rate-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      rateGrid.querySelectorAll(".rate-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentRate = parseFloat(btn.dataset.value);
+      calculate();
+    });
+  });
+
+  amountInput.addEventListener("input", calculate);
+
+  calculate();
+</script>
+<script>
+document.getElementById("navToggle").addEventListener("click", function(e) {
+  e.stopPropagation();
+  document.getElementById("navDropdown").classList.toggle("open");
+});
+document.addEventListener("click", function() {
+  document.getElementById("navDropdown").classList.remove("open");
+});
+</script>
+</body>
+</html>
